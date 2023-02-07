@@ -16,8 +16,15 @@ class Auth:
         if path is None or not excluded_paths:
             return True
         path = path + '/' if path[-1] != '/' else path
-        if path in excluded_paths:
-            return False
+        has_wildcard = any(x.endswith("*") for x in excluded_paths)
+        if not has_wildcard:
+            return path not in excluded_paths
+        for entry in excluded_paths:
+            if entry.endswith("*"):
+                if path.startswith(entry[:-1]):
+                    return False
+            if path == entry:
+                return False
         return True
 
     def authorization_header(self, request=None) -> str:
