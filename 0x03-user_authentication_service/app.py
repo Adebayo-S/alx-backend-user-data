@@ -29,3 +29,23 @@ def users():
     except ValueError as err:
         return jsonify({"message": "email already registered"}), 400
 
+@app.route("/sessions", methods=['POST'], strict_slashes=False)
+def login():
+    """Login user
+    """
+    try:
+        email = request.form.get('email')
+        password = request.form.get('password')
+    except KeyError:
+        abort(400)
+
+    try:
+        if AUTH.valid_login(email, password):
+            session_id = AUTH.create_session(email)
+            response = jsonify({"email": email, "message": "logged in"})
+            response.set_cookie("session_id", session_id)
+            return response
+        else:
+            abort(401)
+    except NoResultFound:
+        abort(401)
