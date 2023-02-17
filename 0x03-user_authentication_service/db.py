@@ -9,6 +9,8 @@ from user import Base, User
 from sqlalchemy.exc import InvalidRequestError
 from sqlalchemy.orm.exc import NoResultFound
 
+VALID_FIELDS = ['id', 'email', 'hashed_password', 'session_id',
+                'reset_token']
 
 class DB:
     """DB class
@@ -54,10 +56,9 @@ class DB:
     def update_user(self, user_id: int, **kwargs) -> None:
         """Update user based on user ID
         """
-        if not self.valid_query_args(**kwargs):
-            raise ValueError
-
         user = self.find_user_by(id=user_id)
         for k, v in kwargs.items():
+            if k not in VALID_FIELDS:
+                raise ValueError
             setattr(user, k, v)
         self._session.commit()
