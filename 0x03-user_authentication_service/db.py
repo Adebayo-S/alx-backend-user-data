@@ -40,8 +40,9 @@ class DB:
         if not email or not hashed_password:
             return
         user = User(email=email, hashed_password=hashed_password)
-        self._session.add(user)
-        self._session.commit()
+        session = self._session
+        session.add(user)
+        session.commit()
         return user
 
     def find_user_by(self, **kwargs) -> User:
@@ -49,8 +50,8 @@ class DB:
         """
         if not kwargs or any(entry not in VALID_FIELDS for entry in kwargs):
             raise InvalidRequestError
-
+        session = self._session
         try:
-            return self._session.query(User).filter_by(**kwargs).one()
+            return session.query(User).filter_by(**kwargs).one()
         except Exception:
             raise NoResultFound
