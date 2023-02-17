@@ -9,6 +9,10 @@ from user import Base, User
 from sqlalchemy.exc import InvalidRequestError
 from sqlalchemy.orm.exc import NoResultFound
 
+VALID_FIELDS = ['id', 'email', 'hashed_password', 'session_id',
+                'reset_token']
+
+
 class DB:
     """DB class
     """
@@ -43,7 +47,7 @@ class DB:
     def find_user_by(self, **kwargs) -> User:
         """ Find user by key_pairs arguements
         """
-        if not kwargs or not self.valid_query_args(**kwargs):
+        if not kwargs or any(entry not in VALID_FIELDS for entry in kwargs):
             raise InvalidRequestError
 
         try:
