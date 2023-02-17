@@ -59,7 +59,5 @@ class DB:
 
         user = self.find_user_by(id=user_id)
         for k, v in kwargs.items():
-            if not self.valid_query_args(**kwargs):
-                raise ValueError
             setattr(user, k, v)
         self._session.commit()
