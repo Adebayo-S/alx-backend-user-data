@@ -9,9 +9,6 @@ from user import Base, User
 from sqlalchemy.exc import InvalidRequestError
 from sqlalchemy.orm.exc import NoResultFound
 
-VALID_FIELDS = ['id', 'email', 'hashed_password', 'session_id',
-                'reset_token']
-
 
 class DB:
     """DB class
@@ -40,18 +37,29 @@ class DB:
         if not email or not hashed_password:
             return
         user = User(email=email, hashed_password=hashed_password)
-        session = self._session
-        session.add(user)
-        session.commit()
+        self._session.add(user)
+        self._session.commit()
         return user
 
     def find_user_by(self, **kwargs) -> User:
         """ Find user by key_pairs arguements
         """
-        if not kwargs or any(entry not in VALID_FIELDS for entry in kwargs):
+        if not kwargs or not self.valid_query_args(**kwargs):
             raise InvalidRequestError
-        session = self._session
         try:
-            return session.query(User).filter_by(**kwargs).one()
+            return self._session.query(User).filter_by(**kwargs).one()
         except Exception:
             raise NoResultFound
+
+    def update_user(self, user_id: int, **kwargs) -> None:
+        """Update user based on user ID
+        """
+        if not self.valid_query_args(**kwargs):
+            raise ValueError
+
+        user = self.find_user_by(id=user_id)
+        for k, v in kwargs.items():
+            if not self.valid_query_args(**kwargs):
+                raise ValueError
+            setattr(user, k, v)
+        self._session.commit()
